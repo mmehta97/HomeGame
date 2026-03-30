@@ -34,7 +34,9 @@ export default function ActionBar({ validActions, gameState, myChips, myBet, onA
     const p: { label: string; value: number }[] = [];
     if (3 * bb >= minRaise && 3 * bb <= maxRaise) p.push({ label: '3BB', value: 3 * bb });
     const half = Math.floor(potTotal / 2);
-    if (half >= minRaise && half <= maxRaise) p.push({ label: '1/2', value: half });
+    if (half >= minRaise && half <= maxRaise) p.push({ label: '½', value: half });
+    const threeFourth = Math.floor(potTotal * 0.75);
+    if (threeFourth >= minRaise && threeFourth <= maxRaise) p.push({ label: '¾', value: threeFourth });
     if (potTotal >= minRaise && potTotal <= maxRaise) p.push({ label: 'Pot', value: potTotal });
     return p;
   }, [potTotal, bb, minRaise, maxRaise]);
@@ -48,11 +50,11 @@ export default function ActionBar({ validActions, gameState, myChips, myBet, onA
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return;
-      const key = e.key.toLowerCase();
-      if (key === 'f' && canFold) { onAction('fold'); }
-      else if (key === 'k' && canCheck) { onAction('check'); }
-      else if (key === 'c' && callAction) { onAction('call'); }
-      else if (key === 'r' && raiseAction) {
+      const k = e.key.toLowerCase();
+      if (k === 'f' && canFold) onAction('fold');
+      else if (k === 'k' && canCheck) onAction('check');
+      else if (k === 'c' && callAction) onAction('call');
+      else if (k === 'r' && raiseAction) {
         if (showRaise) handleRaiseSubmit();
         else { setRaiseAmount(minRaise); setShowRaise(true); }
       }
@@ -63,77 +65,82 @@ export default function ActionBar({ validActions, gameState, myChips, myBet, onA
 
   if (validActions.length === 0) return null;
 
-  const btnBase = 'flex-1 max-w-[130px] py-2.5 rounded font-bold text-[13px] transition-all active:scale-[0.97] select-none';
+  const btnBase: React.CSSProperties = {
+    flex: '1 1 0', maxWidth: 130, padding: '10px 0',
+    borderRadius: 6, fontWeight: 700, fontSize: 13,
+    border: 'none', cursor: 'pointer', textAlign: 'center',
+    transition: 'all 0.1s',
+  };
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-up">
       {/* Raise panel */}
       {showRaise && raiseAction && (
-        <div className="bg-[#161a21] border-t border-[#262b33] px-4 py-2.5">
-          <div className="max-w-[420px] mx-auto space-y-2">
-            <div className="flex gap-1.5 justify-center">
+        <div style={{ background: '#161A21', borderTop: '1px solid #1E2028', padding: '10px 16px' }}>
+          <div style={{ maxWidth: 400, margin: '0 auto' }}>
+            {/* Presets */}
+            <div style={{ display: 'flex', gap: 5, justifyContent: 'center', marginBottom: 8 }}>
               {presets.map(p => (
-                <button key={p.label} onClick={() => setRaiseAmount(p.value)}
-                  className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors ${
-                    raiseAmount === p.value ? 'bg-[#3b82f6] text-white' : 'bg-[#1c2028] text-[#6b7280] hover:text-white'
-                  }`}>{p.label}</button>
+                <button key={p.label} onClick={() => setRaiseAmount(p.value)} style={{
+                  padding: '4px 10px', borderRadius: 4, fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer',
+                  background: raiseAmount === p.value ? '#3B82F6' : '#1E2028', color: raiseAmount === p.value ? '#FFF' : '#6B7280',
+                }}>{p.label}</button>
               ))}
-              <button onClick={() => setRaiseAmount(maxRaise)}
-                className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors ${
-                  raiseAmount === maxRaise ? 'bg-[#ef4444] text-white' : 'bg-[#1c2028] text-[#6b7280] hover:text-white'
-                }`}>Max</button>
+              <button onClick={() => setRaiseAmount(maxRaise)} style={{
+                padding: '4px 10px', borderRadius: 4, fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer',
+                background: raiseAmount === maxRaise ? '#EF4444' : '#1E2028', color: raiseAmount === maxRaise ? '#FFF' : '#6B7280',
+              }}>Max</button>
             </div>
-            <div className="flex items-center gap-2">
+            {/* Slider */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <input type="range" min={minRaise} max={maxRaise} value={raiseAmount}
-                onChange={(e) => setRaiseAmount(Number(e.target.value))}
-                className="flex-1 h-[4px] rounded-full appearance-none cursor-pointer accent-[#3b82f6]"
-                style={{
-                  background: `linear-gradient(to right, #3b82f6 ${((raiseAmount - minRaise) / Math.max(maxRaise - minRaise, 1)) * 100}%, #1c2028 0%)`,
-                }}
-              />
+                onChange={e => setRaiseAmount(Number(e.target.value))}
+                style={{ flex: 1, height: 4, accentColor: '#3B82F6' }} />
               <input type="number" value={raiseAmount}
-                onChange={(e) => setRaiseAmount(Math.min(maxRaise, Math.max(minRaise, Number(e.target.value))))}
-                className="w-[60px] bg-[#0e1015] border border-[#262b33] rounded px-2 py-1 text-[12px] text-white text-center font-mono focus:border-[#3b82f6] focus:outline-none"
-              />
+                onChange={e => setRaiseAmount(Math.min(maxRaise, Math.max(minRaise, Number(e.target.value))))}
+                style={{
+                  width: 56, padding: '4px 6px', borderRadius: 4, border: '1px solid #262B33',
+                  background: '#0E1015', color: '#FFF', fontSize: 12, textAlign: 'center', outline: 'none',
+                  fontFamily: 'monospace',
+                }} />
             </div>
           </div>
         </div>
       )}
 
       {/* Buttons */}
-      <div className="bg-[#0e1015] border-t border-[#262b33] px-4 py-2.5">
-        <div className="max-w-[420px] mx-auto flex gap-2 justify-center">
+      <div style={{ background: '#0E1015', borderTop: '1px solid #1A1C24', padding: '8px 16px' }}>
+        <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', gap: 6, justifyContent: 'center' }}>
           {canFold && (
-            <button onClick={() => onAction('fold')} className={`${btnBase} bg-[#1c2028] text-[#6b7280] hover:text-white border border-[#262b33]`}>
-              Fold <span className="text-[9px] ml-1 opacity-40">F</span>
+            <button onClick={() => onAction('fold')} style={{ ...btnBase, background: '#262A33', color: '#8B949E' }}>
+              Fold <span style={{ fontSize: 9, opacity: 0.4, marginLeft: 3 }}>F</span>
             </button>
           )}
           {canCheck && (
-            <button onClick={() => onAction('check')} className={`${btnBase} bg-[#166534] text-white border border-[#22c55e]/30 hover:bg-[#15803d]`}>
-              Check <span className="text-[9px] ml-1 opacity-40">K</span>
+            <button onClick={() => onAction('check')} style={{ ...btnBase, background: '#1B7A3D', color: '#FFF' }}>
+              Check <span style={{ fontSize: 9, opacity: 0.4, marginLeft: 3 }}>K</span>
             </button>
           )}
           {callAction && (
-            <button onClick={() => onAction('call')} className={`${btnBase} bg-[#166534] text-white border border-[#22c55e]/30 hover:bg-[#15803d]`}>
-              Call {callAction.minAmount} <span className="text-[9px] ml-1 opacity-40">C</span>
+            <button onClick={() => onAction('call')} style={{ ...btnBase, background: '#1B7A3D', color: '#FFF' }}>
+              Call {callAction.minAmount} <span style={{ fontSize: 9, opacity: 0.4, marginLeft: 3 }}>C</span>
             </button>
           )}
           {raiseAction && !showRaise && (
-            <button onClick={() => { setRaiseAmount(minRaise); setShowRaise(true); }}
-              className={`${btnBase} bg-[#1e3a5f] text-white border border-[#3b82f6]/30 hover:bg-[#1e40af]`}>
-              Raise <span className="text-[9px] ml-1 opacity-40">R</span>
+            <button onClick={() => { setRaiseAmount(minRaise); setShowRaise(true); }} style={{ ...btnBase, background: '#2563EB', color: '#FFF' }}>
+              Raise <span style={{ fontSize: 9, opacity: 0.4, marginLeft: 3 }}>R</span>
             </button>
           )}
           {showRaise && (
             <>
-              <button onClick={() => setShowRaise(false)} className="px-3 py-2.5 rounded text-[12px] font-semibold bg-[#1c2028] text-[#6b7280] border border-[#262b33]">Back</button>
-              <button onClick={handleRaiseSubmit} className={`${btnBase} bg-[#1e3a5f] text-white border border-[#3b82f6]/30 hover:bg-[#1e40af]`}>
-                Raise {(raiseAmount + myBet).toLocaleString()} <span className="text-[9px] ml-1 opacity-40">R</span>
+              <button onClick={() => setShowRaise(false)} style={{ ...btnBase, maxWidth: 70, background: '#262A33', color: '#6B7280' }}>Back</button>
+              <button onClick={handleRaiseSubmit} style={{ ...btnBase, background: '#2563EB', color: '#FFF' }}>
+                Raise {(raiseAmount + myBet).toLocaleString()} <span style={{ fontSize: 9, opacity: 0.4, marginLeft: 3 }}>R</span>
               </button>
             </>
           )}
           {!raiseAction && allInAction && !showRaise && (
-            <button onClick={() => onAction('all-in')} className={`${btnBase} bg-[#7f1d1d] text-white border border-[#ef4444]/30 hover:bg-[#991b1b]`}>
+            <button onClick={() => onAction('all-in')} style={{ ...btnBase, background: '#DC2626', color: '#FFF' }}>
               All-In {allInAction.minAmount?.toLocaleString()}
             </button>
           )}

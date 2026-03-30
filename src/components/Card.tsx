@@ -3,23 +3,22 @@
 import { Card as CardType } from '@/types';
 import { useFourColor } from './DeckColorContext';
 
-const SUIT_2COLOR: Record<string, { symbol: string; color: string }> = {
-  h: { symbol: '\u2665', color: '#dc2626' },
-  d: { symbol: '\u2666', color: '#dc2626' },
-  c: { symbol: '\u2663', color: '#1a1a1a' },
-  s: { symbol: '\u2660', color: '#1a1a1a' },
+const SUIT_2C: Record<string, { sym: string; color: string }> = {
+  h: { sym: '\u2665', color: '#E5343A' },
+  d: { sym: '\u2666', color: '#E5343A' },
+  c: { sym: '\u2663', color: '#1C1C1C' },
+  s: { sym: '\u2660', color: '#1C1C1C' },
+};
+const SUIT_4C: Record<string, { sym: string; color: string }> = {
+  h: { sym: '\u2665', color: '#E5343A' },
+  d: { sym: '\u2666', color: '#3B7BF6' },
+  c: { sym: '\u2663', color: '#2D9F4E' },
+  s: { sym: '\u2660', color: '#1C1C1C' },
 };
 
-const SUIT_4COLOR: Record<string, { symbol: string; color: string }> = {
-  h: { symbol: '\u2665', color: '#dc2626' },
-  d: { symbol: '\u2666', color: '#2563eb' },
-  c: { symbol: '\u2663', color: '#16a34a' },
-  s: { symbol: '\u2660', color: '#1a1a1a' },
-};
-
-const RANK_DISPLAY: Record<string, string> = {
-  'T': '10', 'J': 'J', 'Q': 'Q', 'K': 'K', 'A': 'A',
-  '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
+const RANK: Record<string, string> = {
+  '2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9',
+  'T':'10','J':'J','Q':'Q','K':'K','A':'A',
 };
 
 interface CardProps {
@@ -31,78 +30,59 @@ interface CardProps {
   fourColor?: boolean;
 }
 
-const DIMS = {
-  sm: { w: 36, h: 50, rank: 13, suitSm: 10, suitLg: 20, pad: 2 },
-  md: { w: 52, h: 72, rank: 17, suitSm: 13, suitLg: 30, pad: 3 },
-  lg: { w: 64, h: 88, rank: 21, suitSm: 15, suitLg: 36, pad: 4 },
+// PokerNow-style card dimensions
+const D = {
+  sm: { w: 32, h: 44, r: 14, s: 11, gap: -1, pad: 3, radius: 3 },
+  md: { w: 48, h: 66, r: 19, s: 14, gap: -1, pad: 4, radius: 4 },
+  lg: { w: 58, h: 80, r: 23, s: 17, gap: -1, pad: 5, radius: 5 },
 };
 
-export default function Card({ card, faceDown = false, size = 'md', className = '', style, fourColor: fourColorProp }: CardProps) {
-  const fourColorCtx = useFourColor();
-  const fourColor = fourColorProp ?? fourColorCtx;
-  const d = DIMS[size];
+export default function Card({ card, faceDown = false, size = 'md', className = '', style, fourColor: fp }: CardProps) {
+  const fc = useFourColor();
+  const use4c = fp ?? fc;
+  const d = D[size];
 
-  // Face-down card
+  // Face down
   if (faceDown || !card) {
     return (
-      <div className={`rounded-md overflow-hidden ${className}`}
-        style={{
-          width: d.w, height: d.h,
-          background: 'linear-gradient(145deg, #1e3a8a 0%, #1e40af 40%, #1d4ed8 100%)',
-          border: '1.5px solid rgba(59,130,246,0.4)',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-          ...style,
-        }}
-      >
-        <div className="w-full h-full flex items-center justify-center">
-          <div style={{ width: '55%', height: '65%', borderRadius: 2, border: '1px solid rgba(255,255,255,0.08)',
-            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 3px)',
-          }} />
-        </div>
-      </div>
+      <div className={className} style={{
+        width: d.w, height: d.h, borderRadius: d.radius,
+        background: '#2B2D52',
+        border: '1px solid #3D3F6A',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
+        ...style,
+      }} />
     );
   }
 
-  const suitMap = fourColor ? SUIT_4COLOR : SUIT_2COLOR;
-  const { symbol, color } = suitMap[card.suit];
-  const rank = RANK_DISPLAY[card.rank];
+  const suit = use4c ? SUIT_4C[card.suit] : SUIT_2C[card.suit];
 
   return (
-    <div className={`rounded-md overflow-hidden select-none ${className}`}
-      style={{
-        position: 'relative',
-        width: d.w, height: d.h,
-        background: 'linear-gradient(180deg, #ffffff 0%, #f9f9f7 100%)',
-        border: '1px solid #d4d4cc',
-        boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-        ...style,
-      }}
-    >
-      {/* Top-left corner: rank then small suit below it */}
+    <div className={className} style={{
+      position: 'relative',
+      width: d.w, height: d.h, borderRadius: d.radius,
+      background: '#FFFFFF',
+      border: '1px solid #D8D8D0',
+      boxShadow: '0 1px 4px rgba(0,0,0,0.18)',
+      overflow: 'hidden',
+      userSelect: 'none',
+      ...style,
+    }}>
       <div style={{
-        position: 'absolute',
-        top: d.pad,
-        left: d.pad,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
+        position: 'absolute', top: d.pad, left: d.pad,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
         lineHeight: 1,
       }}>
-        <span style={{ fontSize: d.rank, fontWeight: 800, color, lineHeight: 1 }}>{rank}</span>
-        <span style={{ fontSize: d.suitSm, color, lineHeight: 1, marginTop: -1 }}>{symbol}</span>
+        <span style={{
+          fontSize: d.r, fontWeight: 700, color: suit.color,
+          fontFamily: "'Inter', -apple-system, sans-serif",
+          lineHeight: 1,
+        }}>{RANK[card.rank]}</span>
+        <span style={{
+          fontSize: d.s, color: suit.color, lineHeight: 1,
+          marginTop: d.gap,
+        }}>{suit.sym}</span>
       </div>
-
-      {/* Center: large suit */}
-      <div style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0, bottom: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <span style={{ fontSize: d.suitLg, color, lineHeight: 1 }}>{symbol}</span>
-      </div>
-
     </div>
   );
 }
