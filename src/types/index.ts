@@ -60,7 +60,7 @@ export interface PlayerPreferences {
 
 export const DEFAULT_PREFERENCES: PlayerPreferences = {
   autoStraddle: false,
-  runItPref: 'once',
+  runItPref: 'ask',
   deckColor: '2color',
   autoTopUp: false,
   autoTopUpTarget: 0,
@@ -110,7 +110,8 @@ export interface GameConfig {
   bigBlind: number;
   minBuyIn: number;
   maxBuyIn: number;
-  turnTimer: number;
+  turnTimer: number;         // Seconds per turn (0 = unlimited)
+  timeBank: number;          // Extra seconds bank per player per hand (0 = none)
   autoFoldOnTimeout: boolean;
   allowStraddle: boolean;
   ante: number;

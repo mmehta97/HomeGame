@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { connectSocket, getSocket, ensureConnected } from '@/lib/socket';
 import useGameStore from '@/lib/store';
 import Table from '@/components/Table';
+import { DeckColorProvider } from '@/components/DeckColorContext';
 import ActionBar from '@/components/ActionBar';
 import WinnerToast from '@/components/WinnerToast';
 import type { PublicGameState, WinResult, GameConfig, PlayerPreferences } from '@/types';
@@ -218,7 +219,9 @@ export default function GamePage() {
         {/* Full-size table behind */}
         <div className="flex-1 flex items-center justify-center p-2 min-h-0 relative">
           {gameState && (
-            <Table gameState={gameState} myPlayerId={null} timeRemaining={0} onSelectSeat={s => setSelectedSeat(s)} />
+            <DeckColorProvider fourColor={false}>
+              <Table gameState={gameState} myPlayerId={null} timeRemaining={0} onSelectSeat={s => setSelectedSeat(s)} />
+            </DeckColorProvider>
           )}
 
           {/* Join flow — seat-first, then name/buy-in form */}
@@ -367,7 +370,11 @@ export default function GamePage() {
 
       {/* Table area */}
       <div className="flex-1 flex items-center justify-center p-2 min-h-0">
-        {gameState && <Table gameState={gameState} myPlayerId={playerId} timeRemaining={timeRemaining} winners={winners} />}
+        {gameState && (
+          <DeckColorProvider fourColor={me?.preferences.deckColor === '4color'}>
+            <Table gameState={gameState} myPlayerId={playerId} timeRemaining={timeRemaining} winners={winners} />
+          </DeckColorProvider>
+        )}
       </div>
 
       {/* Deal / Pause — host only */}

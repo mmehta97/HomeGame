@@ -12,6 +12,7 @@ const DEFAULT_CONFIG: GameConfig = {
   minBuyIn: 0,
   maxBuyIn: 0,
   turnTimer: 30,
+  timeBank: 30,
   autoFoldOnTimeout: true,
   allowStraddle: false,
   ante: 0,

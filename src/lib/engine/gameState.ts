@@ -6,7 +6,7 @@ import {
 
 const DEFAULT_PREFERENCES: PlayerPreferences = {
   autoStraddle: false,
-  runItPref: 'once',
+  runItPref: 'ask',
   deckColor: '2color',
   autoTopUp: false,
   autoTopUpTarget: 0,
@@ -34,6 +34,7 @@ export function createDefaultConfig(): GameConfig {
     minBuyIn: 0,   // 0 = no minimum
     maxBuyIn: 0,   // 0 = no maximum
     turnTimer: 30,
+    timeBank: 30,
     autoFoldOnTimeout: true,
     allowStraddle: false,
     ante: 0,

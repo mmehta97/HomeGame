@@ -1,6 +1,7 @@
 'use client';
 
 import { Card as CardType } from '@/types';
+import { useFourColor } from './DeckColorContext';
 
 const SUIT_2COLOR: Record<string, { symbol: string; color: string }> = {
   h: { symbol: '\u2665', color: '#dc2626' },
@@ -31,12 +32,14 @@ interface CardProps {
 }
 
 const DIMS = {
-  sm: { w: 36, h: 50, rank: 11, suitSm: 8, suitLg: 18, pad: 3 },
-  md: { w: 52, h: 72, rank: 14, suitSm: 10, suitLg: 26, pad: 4 },
-  lg: { w: 64, h: 88, rank: 17, suitSm: 12, suitLg: 32, pad: 5 },
+  sm: { w: 36, h: 50, rank: 13, suitSm: 10, suitLg: 20, pad: 2 },
+  md: { w: 52, h: 72, rank: 17, suitSm: 13, suitLg: 30, pad: 3 },
+  lg: { w: 64, h: 88, rank: 21, suitSm: 15, suitLg: 36, pad: 4 },
 };
 
-export default function Card({ card, faceDown = false, size = 'md', className = '', style, fourColor = false }: CardProps) {
+export default function Card({ card, faceDown = false, size = 'md', className = '', style, fourColor: fourColorProp }: CardProps) {
+  const fourColorCtx = useFourColor();
+  const fourColor = fourColorProp ?? fourColorCtx;
   const d = DIMS[size];
 
   // Face-down card

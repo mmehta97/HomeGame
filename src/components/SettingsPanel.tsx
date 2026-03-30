@@ -267,6 +267,7 @@ export default function SettingsPanel({
         <NumberField label="Min Buy-in" field="minBuyIn" suffix="x BB" />
         <NumberField label="Max Buy-in" field="maxBuyIn" suffix="x BB" />
         <NumberField label="Turn Timer" field="turnTimer" suffix="sec" />
+        <NumberField label="Time Bank" field="timeBank" suffix="sec" />
         <NumberField label="Max Players" field="maxPlayers" />
         <NumberField label="Ante" field="ante" />
 
