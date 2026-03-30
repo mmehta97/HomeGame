@@ -3,7 +3,12 @@ import { Server } from 'socket.io';
 import { registerHandlers } from './handlers';
 import { ClientToServerEvents, ServerToClientEvents } from '../types';
 
-const httpServer = createServer();
+const httpServer = createServer((req, res) => {
+  if (req.url === '/' || req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('OK');
+  }
+});
 
 // Allow all origins in development; in production, set ALLOWED_ORIGINS env var
 const allowedOrigins = process.env.ALLOWED_ORIGINS
