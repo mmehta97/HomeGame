@@ -30,6 +30,7 @@ import {
   updateLedger,
   getLedgerEntries,
 } from './rooms';
+import { trackEvent } from './analytics';
 
 type AppServer = Server<ClientToServerEvents, ServerToClientEvents>;
 type AppSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
@@ -256,6 +257,7 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
   socket.on('room:create', (config: GameConfig, callback) => {
     const room = createRoom(config, socket.id);
     socket.join(room.id);
+    trackEvent({ type: 'table_created', roomId: room.id, timestamp: Date.now(), data: { variant: config.variant } });
     console.log(`Room ${room.id} created by ${socket.id}`);
     callback(room.id);
   });
@@ -361,6 +363,7 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
     socket.emit('room:joined', { roomId, playerId, seatIndex, isHost: true });
 
     broadcastGameState(io, room);
+    trackEvent({ type: 'player_joined', roomId, timestamp: Date.now(), data: { playerName, seatIndex } });
     console.log(`Player ${playerName} joined room ${roomId} at seat ${seatIndex}`);
     callback(true);
   });
@@ -396,6 +399,7 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
     });
 
     broadcastGameState(io, room);
+    trackEvent({ type: 'player_joined', roomId: room.id, timestamp: Date.now(), data: { playerName: request.playerName, seatIndex: request.seatIndex } });
     console.log(`Host approved ${request.playerName} to join room ${room.id}`);
   });
 
@@ -433,6 +437,7 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
     broadcastGameState(io, room);
     notifyActionRequired(io, room);
     startTurnTimer(io, room);
+    trackEvent({ type: 'hand_started', roomId: room.id, timestamp: Date.now(), data: { handNumber: room.gameState.handNumber } });
     console.log(`Hand #${room.gameState.handNumber} in room ${room.id}`);
   });
 

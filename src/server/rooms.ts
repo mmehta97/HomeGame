@@ -57,6 +57,10 @@ export function deleteRoom(roomId: string): void {
   }
 }
 
+export function getAllRooms(): Map<string, Room> {
+  return rooms;
+}
+
 export function getRoomBySocketId(socketId: string): Room | undefined {
   for (const room of rooms.values()) {
     if (room.playerSocketMap.has(socketId)) return room;
