@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "Read(//c/Users/hemal/OneDrive/Documents/Claude/**)",
+      "Bash(npx create-next-app@latest homegame-temp --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "Bash(npm install:*)",
+      "Bash(npx jest:*)",
+      "Bash(npx next:*)",
+      "WebFetch(domain:pokernow.club)",
+      "WebFetch(domain:www.pokernow.com)",
+      "WebSearch",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(pkill -f \"ts-node\")",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //F //PID 18500)",
+      "Bash(taskkill //F //PID 10004)",
+      "Bash(taskkill //F //PID 6092)",
+      "Bash(curl:*)",
+      "Bash(while read:*)",
+      "Bash(do taskkill:*)",
+      "Bash(done)",
+      "Bash(git config:*)",
+      "Bash(taskkill //F //PID 29416)",
+      "Bash(taskkill //F //PID 15776)",
+      "Bash(taskkill //F //PID 16520)",
+      "Bash(taskkill //F //PID 9564)",
+      "Bash(gh auth:*)",
+      "Bash(where.exe gh:*)",
+      "Read(//c/Program Files/GitHub CLI/**)",
+      "Read(//c/Program Files \\(x86\\)/GitHub CLI/**)",
+      "Read(//c/Users/hemal/**)",
+      "Bash(ls /c/Users/hemal/AppData/Local/Microsoft/WinGet/Packages/*GitHub*)",
+      "Bash(ls /c/Users/hemal/AppData/Local/Programs/*gh*)",
+      "Bash(cmd.exe //c \"where gh\")"
+    ]
+  }
+}
