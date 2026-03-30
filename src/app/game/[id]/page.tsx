@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { connectSocket, getSocket } from '@/lib/socket';
+import { connectSocket, getSocket, ensureConnected } from '@/lib/socket';
 import useGameStore from '@/lib/store';
 import Table from '@/components/Table';
 import ActionBar from '@/components/ActionBar';

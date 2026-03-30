@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { connectSocket } from '@/lib/socket';
+import { ensureConnected } from '@/lib/socket';
 import type { GameConfig } from '@/types';
 
 const DEFAULT_CONFIG: GameConfig = {
@@ -23,17 +23,27 @@ const DEFAULT_CONFIG: GameConfig = {
 export default function Home() {
   const router = useRouter();
   const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     setCreating(true);
-    const socket = connectSocket();
-    const doCreate = () => {
+    setError(null);
+
+    try {
+      const socket = await ensureConnected();
       socket.emit('room:create', DEFAULT_CONFIG, (roomId: string) => {
         router.push(`/game/${roomId}`);
       });
-    };
-    socket.on('connect', doCreate);
-    if (socket.connected) doCreate();
+
+      // Safety timeout — if room:create callback never fires
+      setTimeout(() => {
+        setCreating(false);
+        setError('Server not responding. Try again.');
+      }, 10000);
+    } catch {
+      setCreating(false);
+      setError('Could not connect to server. Try again.');
+    }
   };
 
   return (
@@ -51,6 +61,12 @@ export default function Home() {
           style={{ background: creating ? '#1c2028' : '#1e40af', border: '1px solid rgba(59,130,246,0.3)' }}>
           {creating ? 'Creating...' : 'Create Game'}
         </button>
+
+        {error && (
+          <div className="rounded bg-[#ef4444]/10 border border-[#ef4444]/20 px-3 py-2 text-[12px] text-[#ef4444]">
+            {error}
+          </div>
+        )}
 
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-[#1c2028]" />
