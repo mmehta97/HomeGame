@@ -3,13 +3,11 @@ FROM node:20-alpine
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev && npm install ts-node typescript
+RUN npm ci --omit=dev && npm install ts-node typescript tsconfig-paths
 
 COPY tsconfig.server.json ./
 COPY src/server ./src/server
 COPY src/lib/engine ./src/lib/engine
 COPY src/types ./src/types
 
-EXPOSE 3001
-
-CMD ["npx", "ts-node", "--project", "tsconfig.server.json", "src/server/index.ts"]
+CMD ["npx", "ts-node", "-r", "tsconfig-paths/register", "--project", "tsconfig.server.json", "src/server/index.ts"]
