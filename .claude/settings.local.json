@@ -32,7 +32,10 @@
       "Read(//c/Users/hemal/**)",
       "Bash(ls /c/Users/hemal/AppData/Local/Microsoft/WinGet/Packages/*GitHub*)",
       "Bash(ls /c/Users/hemal/AppData/Local/Programs/*gh*)",
-      "Bash(cmd.exe //c \"where gh\")"
+      "Bash(cmd.exe //c \"where gh\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }

@@ -250,11 +250,13 @@ export default function SettingsPanel({
               style={{ ...inputStyle, cursor: 'pointer' }}
             >
               <option value="nlh">No-Limit Hold&apos;em</option>
-              <option value="plo4">Pot-Limit Omaha (4)</option>
+              <option value="plo4">Pot-Limit Omaha 4</option>
+              <option value="plo5">Pot-Limit Omaha 5</option>
+              <option value="plo6">Pot-Limit Omaha 6</option>
             </select>
           ) : (
             <div style={readOnlyValueStyle}>
-              {draft.variant === 'plo4' ? 'PLO4' : 'NLH'}
+              {{ nlh: 'NLH', plo4: 'PLO4', plo5: 'PLO5', plo6: 'PLO6' }[draft.variant] || draft.variant}
             </div>
           )}
         </div>

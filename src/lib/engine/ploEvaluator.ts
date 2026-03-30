@@ -7,7 +7,7 @@ import { evaluateHand } from './handEvaluator';
  */
 export function evaluatePloHand(holeCards: Card[], communityCards: Card[]): HandResult {
   if (holeCards.length < 4 || communityCards.length < 3) {
-    throw new Error(`PLO needs 4 hole cards and at least 3 community cards, got ${holeCards.length} and ${communityCards.length}`);
+    throw new Error(`PLO needs at least 4 hole cards and 3 community cards, got ${holeCards.length} and ${communityCards.length}`);
   }
 
   const holeCombos = combinations(holeCards, 2);

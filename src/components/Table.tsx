@@ -227,7 +227,7 @@ export default function Table({ gameState, myPlayerId, timeRemaining, onSelectSe
             timeRemaining={activePlayerIndex === seatIdx ? timeRemaining : 0}
             onSelectSeat={() => onSelectSeat?.(seatIdx)}
             totalPositions={config.maxPlayers}
-            numHoleCards={config.variant === 'plo4' ? 4 : 2}
+            numHoleCards={{ nlh: 2, plo4: 4, plo5: 5, plo6: 6 }[config.variant] || 2}
           />
         );
       })}

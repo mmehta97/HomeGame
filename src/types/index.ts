@@ -99,7 +99,7 @@ export interface Pot {
   eligiblePlayerIds: string[];
 }
 
-export type GameVariant = 'nlh' | 'plo4';
+export type GameVariant = 'nlh' | 'plo4' | 'plo5' | 'plo6';
 
 export interface GameConfig {
   variant: GameVariant;

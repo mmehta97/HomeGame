@@ -20,7 +20,7 @@ import { calculatePots } from './potCalculator';
 
 /** Evaluate a hand based on game variant */
 function evaluateHandForVariant(holeCards: Card[], communityCards: Card[], variant: string): ReturnType<typeof evaluateHand> {
-  if (variant === 'plo4') {
+  if (variant === 'plo4' || variant === 'plo5' || variant === 'plo6') {
     return evaluatePloHand(holeCards, communityCards);
   }
   return evaluateHand([...holeCards, ...communityCards]);
@@ -136,7 +136,8 @@ export function startNewHand(state: GameState): GameState {
   let deck = shuffleDeck(createDeck());
 
   // Deal hole cards (2 for NLH, 4 for PLO)
-  const numHoleCards = state.config.variant === 'plo4' ? 4 : 2;
+  const holeCardCounts: Record<string, number> = { nlh: 2, plo4: 4, plo5: 5, plo6: 6 };
+  const numHoleCards = holeCardCounts[state.config.variant] || 2;
   const inHand = players.filter(p => p.status === 'active');
   for (const player of inHand) {
     const { dealt, remaining } = dealCards(deck, numHoleCards);
@@ -281,7 +282,7 @@ export function getValidActions(state: GameState, playerId: string): ValidAction
   const minRaiseTotal = state.currentBet + state.minRaise;
   let maxRaiseChips = player.chips; // NLH default: can raise up to all chips
 
-  if (state.config.variant === 'plo4') {
+  if (state.config.variant === 'plo4' || state.config.variant === 'plo5' || state.config.variant === 'plo6') {
     // Pot-limit: max raise = pot + all bets + the call amount (before raising)
     const potTotal = state.pots.reduce((s, p) => s + p.amount, 0);
     const allBets = state.players.reduce((s, p) => s + p.bet, 0);

@@ -169,7 +169,7 @@ function resolveAllInShowdown(io: AppServer, room: Room): void {
     const variant = gs.config.variant;
     const hands = eligible.map(p => ({
       player: p,
-      hand: variant === 'plo4'
+      hand: (variant === 'plo4' || variant === 'plo5' || variant === 'plo6')
         ? evaluatePloHand(p.holeCards, gs.communityCards)
         : evaluateHand([...p.holeCards, ...gs.communityCards]),
     }));

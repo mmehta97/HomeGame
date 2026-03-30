@@ -322,7 +322,7 @@ export default function GamePage() {
 
           <div className="flex items-center gap-2 ml-1 text-[10px] text-[#3d4350]">
             <span className="font-mono">
-              {gameState?.config.variant === 'plo4' ? 'PLO4' : 'NLH'} {gameState?.config.smallBlind}/{gameState?.config.bigBlind}
+              {{ nlh: 'NLH', plo4: 'PLO4', plo5: 'PLO5', plo6: 'PLO6' }[gameState?.config.variant || 'nlh']} {gameState?.config.smallBlind}/{gameState?.config.bigBlind}
             </span>
             <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-[#22c55e]' : 'bg-[#ef4444]'}`} />
           </div>
