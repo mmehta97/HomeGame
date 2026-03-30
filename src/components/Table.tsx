@@ -27,11 +27,12 @@ export default function Table({ gameState, myPlayerId, timeRemaining, onSelectSe
   const [newCardStart, setNewCardStart] = useState(-1);
   const [chipAnims, setChipAnims] = useState<ChipAnim[]>([]);
   const prevWinners = useRef('');
+  const prevPhase = useRef(phase);
+  const [showSweep, setShowSweep] = useState(false);
 
-  // Card animation tracking
+  // Card animation
   useEffect(() => {
-    const curr = communityCards.length;
-    const prev = prevCardCount.current;
+    const curr = communityCards.length, prev = prevCardCount.current;
     if (curr > prev && curr > 0) {
       setNewCardStart(prev);
       const t = setTimeout(() => setNewCardStart(-1), 1200);
@@ -41,7 +42,20 @@ export default function Table({ gameState, myPlayerId, timeRemaining, onSelectSe
     if (curr === 0) { prevCardCount.current = 0; setNewCardStart(-1); }
   }, [communityCards.length]);
 
-  // Chip animation
+  // Pot sweep animation — when phase advances (bets collected into pot)
+  useEffect(() => {
+    if (phase !== prevPhase.current) {
+      const wasActive = ['preflop', 'flop', 'turn', 'river'].includes(prevPhase.current);
+      const isNext = ['flop', 'turn', 'river', 'showdown'].includes(phase);
+      if (wasActive && isNext) {
+        setShowSweep(true);
+        setTimeout(() => setShowSweep(false), 500);
+      }
+      prevPhase.current = phase;
+    }
+  }, [phase]);
+
+  // Win chip animation
   useEffect(() => {
     const k = winners.map(w => w.playerId + w.amount).join(',');
     if (k && k !== prevWinners.current && winners.length > 0) {
@@ -66,7 +80,7 @@ export default function Table({ gameState, myPlayerId, timeRemaining, onSelectSe
   const myPlayer = players.find(p => p.id === myPlayerId);
   const mySeat = myPlayer?.seatIndex ?? null;
 
-  // SB/BB
+  // SB/BB calc
   const inHand = players.filter(p => p.hasCards || p.status === 'all-in');
   let sbSeat = -1, bbSeat = -1;
   if (dealerIndex >= 0 && inHand.length >= 2) {
@@ -78,7 +92,10 @@ export default function Table({ gameState, myPlayerId, timeRemaining, onSelectSe
     }
   }
 
-  const potTotal = pots.reduce((s, p) => s + p.amount, 0);
+  // Pot: committed pot (from pots array) vs current round bets
+  const committedPot = pots.reduce((s, p) => s + p.amount, 0);
+  const currentBets = players.reduce((s, p) => s + p.bet, 0);
+  const totalPot = committedPot + currentBets;
 
   return (
     <div className="relative w-full max-w-[780px] mx-auto" style={{ aspectRatio: '16 / 9' }}>
@@ -94,7 +111,7 @@ export default function Table({ gameState, myPlayerId, timeRemaining, onSelectSe
           {/* Inner line */}
           <div className="absolute inset-[7%] rounded-[50%]" style={{ border: '1px solid rgba(255,255,255,0.04)' }} />
 
-          {/* HomeGame watermark */}
+          {/* Watermark */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
             <span style={{ fontSize: '3vw', fontWeight: 700, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.04)', textTransform: 'uppercase' }}>HomeGame</span>
           </div>
@@ -117,14 +134,27 @@ export default function Table({ gameState, myPlayerId, timeRemaining, onSelectSe
               </div>
             )}
 
-            {/* Pot */}
-            {potTotal > 0 && (
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 5,
-                background: 'rgba(0,0,0,0.3)', borderRadius: 12, padding: '3px 10px',
-              }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#EAB308' }} />
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#FFF' }}>{potTotal.toLocaleString()}</span>
+            {/* Pot display */}
+            {totalPot > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                {/* Total pot */}
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  background: 'rgba(0,0,0,0.35)', borderRadius: 12, padding: '3px 12px',
+                  transition: 'all 0.3s ease',
+                }}>
+                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#EAB308' }} />
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#FFF' }}>
+                    {totalPot.toLocaleString()}
+                  </span>
+                </div>
+
+                {/* Breakdown: committed + current round */}
+                {committedPot > 0 && currentBets > 0 && (
+                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>
+                    {committedPot.toLocaleString()} + {currentBets.toLocaleString()}
+                  </span>
+                )}
               </div>
             )}
 
@@ -139,7 +169,26 @@ export default function Table({ gameState, myPlayerId, timeRemaining, onSelectSe
               </div>
             )}
 
-            {/* Chip animation */}
+            {/* Sweep animation — chips collecting into pot */}
+            {showSweep && (
+              <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                {[0, 1, 2, 3, 4, 5].map(i => {
+                  const angle = (i / 6) * Math.PI * 2;
+                  return (
+                    <div key={i} className="absolute chip-sweep" style={{
+                      '--to-x': '0px', '--to-y': '0px',
+                      left: `calc(50% + ${Math.cos(angle) * 80}px)`,
+                      top: `calc(50% + ${Math.sin(angle) * 50}px)`,
+                      animationDelay: `${i * 0.05}s`,
+                    } as React.CSSProperties}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'linear-gradient(180deg, #EAB308, #CA8A04)' }} />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Win chip burst */}
             {chipAnims.length > 0 && (
               <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
                 {chipAnims.map(c => (
@@ -161,7 +210,7 @@ export default function Table({ gameState, myPlayerId, timeRemaining, onSelectSe
                     display: 'flex', alignItems: 'center', gap: 6,
                     padding: '7px 16px', borderRadius: 6,
                     background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.08)',
-                    color: 'rgba(255,255,255,0.55)', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                    color: 'rgba(255,255,255,0.55)', fontSize: 12, fontWeight: 600,
                   }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
