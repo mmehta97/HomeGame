@@ -76,3 +76,36 @@ body {
 .card-peel { animation: card-peel 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
 .card-flip { animation: card-flip 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
 .chip-fly { animation: chip-fly 0.8s ease-out both; }
+
+/* Global interactive feedback for all buttons and clickable elements */
+button, [role="button"], select, .clickable {
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+button:hover:not(:disabled), [role="button"]:hover, select:hover {
+  filter: brightness(1.15);
+}
+button:active:not(:disabled), [role="button"]:active {
+  transform: scale(0.97);
+  filter: brightness(0.9);
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Input focus glow */
+input:focus, select:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+/* Subtle tap ripple for touch */
+@keyframes tap-ripple {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); }
+  100% { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); }
+}
+button:focus-visible {
+  animation: tap-ripple 0.3s ease-out;
+  outline: 1px solid rgba(59, 130, 246, 0.4);
+  outline-offset: 2px;
+}
