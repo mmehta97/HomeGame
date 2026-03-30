@@ -6,8 +6,8 @@ import {
 
 const DEFAULT_PREFERENCES: PlayerPreferences = {
   autoStraddle: false,
-  runItTwice: false,
-  runItThrice: false,
+  runItPref: 'once',
+  deckColor: '2color',
   autoTopUp: false,
   autoTopUpTarget: 0,
   autoTopUpThreshold: 0,
@@ -71,8 +71,13 @@ export function addPlayer(
   seatIndex: number,
   buyIn: number,
 ): { state: GameState; error?: string } {
-  if (seatIndex < 0 || seatIndex >= state.config.maxPlayers) {
-    return { state, error: 'Invalid seat' };
+  // Variant-specific max player limits
+  const variantMaxPlayers: Record<string, number> = { nlh: 9, plo4: 9, plo5: 8, plo6: 7 };
+  const hardMax = variantMaxPlayers[state.config.variant] || 9;
+  const effectiveMax = Math.min(state.config.maxPlayers, hardMax);
+
+  if (seatIndex < 0 || seatIndex >= effectiveMax) {
+    return { state, error: `Max ${effectiveMax} players for ${state.config.variant.toUpperCase()}` };
   }
   if (state.players.find(p => p.seatIndex === seatIndex)) {
     return { state, error: 'Seat taken' };
@@ -749,6 +754,18 @@ export function getPublicState(state: GameState, forPlayerId?: string) {
     winners: state.winners,
     handHistory: state.handHistory,
   };
+}
+
+/**
+ * Calculate max number of times the board can be run given remaining deck and community cards needed.
+ * 52 cards total - hole cards dealt - community cards already out = remaining deck.
+ * Each run needs (5 - communityCards.length) cards.
+ */
+export function maxRunItTimes(state: GameState): number {
+  const remainingDeck = state.deck.length;
+  const cardsNeeded = 5 - state.communityCards.length;
+  if (cardsNeeded <= 0) return 1;
+  return Math.max(1, Math.floor(remainingDeck / cardsNeeded));
 }
 
 export { calculatePots };

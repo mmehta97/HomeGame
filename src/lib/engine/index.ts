@@ -12,4 +12,5 @@ export {
   getValidActions,
   processAction,
   getPublicState,
+  maxRunItTimes,
 } from './gameState';

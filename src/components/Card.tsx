@@ -2,10 +2,17 @@
 
 import { Card as CardType } from '@/types';
 
-const SUIT_MAP: Record<string, { symbol: string; color: string }> = {
+const SUIT_2COLOR: Record<string, { symbol: string; color: string }> = {
   h: { symbol: '\u2665', color: '#dc2626' },
   d: { symbol: '\u2666', color: '#dc2626' },
   c: { symbol: '\u2663', color: '#1a1a1a' },
+  s: { symbol: '\u2660', color: '#1a1a1a' },
+};
+
+const SUIT_4COLOR: Record<string, { symbol: string; color: string }> = {
+  h: { symbol: '\u2665', color: '#dc2626' },
+  d: { symbol: '\u2666', color: '#2563eb' },
+  c: { symbol: '\u2663', color: '#16a34a' },
   s: { symbol: '\u2660', color: '#1a1a1a' },
 };
 
@@ -20,6 +27,7 @@ interface CardProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   style?: React.CSSProperties;
+  fourColor?: boolean;
 }
 
 const DIMS = {
@@ -28,7 +36,7 @@ const DIMS = {
   lg: { w: 64, h: 88, rank: 17, suitSm: 12, suitLg: 32, pad: 5 },
 };
 
-export default function Card({ card, faceDown = false, size = 'md', className = '', style }: CardProps) {
+export default function Card({ card, faceDown = false, size = 'md', className = '', style, fourColor = false }: CardProps) {
   const d = DIMS[size];
 
   // Face-down card
@@ -52,7 +60,8 @@ export default function Card({ card, faceDown = false, size = 'md', className = 
     );
   }
 
-  const { symbol, color } = SUIT_MAP[card.suit];
+  const suitMap = fourColor ? SUIT_4COLOR : SUIT_2COLOR;
+  const { symbol, color } = suitMap[card.suit];
   const rank = RANK_DISPLAY[card.rank];
 
   return (

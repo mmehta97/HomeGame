@@ -45,20 +45,23 @@ export type PlayerStatus =
   | 'all-in'
   | 'sitting-out';
 
+export type RunItPref = 'once' | 'twice' | 'thrice' | 'ask';
+export type DeckColorPref = '2color' | '4color';
+
 export interface PlayerPreferences {
   autoStraddle: boolean;
-  runItTwice: boolean;        // Player's preference for running it twice
-  runItThrice: boolean;       // Player's preference for running it thrice
-  autoTopUp: boolean;         // Auto top-up enabled
-  autoTopUpTarget: number;    // Top up to this amount
-  autoTopUpThreshold: number; // When chips fall below this, trigger top-up
-  autoTopUpApproved: boolean; // Host has approved this player's auto top-up
+  runItPref: RunItPref;         // How many times to run it when all-in
+  deckColor: DeckColorPref;     // 2-color (red/black) or 4-color deck
+  autoTopUp: boolean;
+  autoTopUpTarget: number;
+  autoTopUpThreshold: number;
+  autoTopUpApproved: boolean;
 }
 
 export const DEFAULT_PREFERENCES: PlayerPreferences = {
   autoStraddle: false,
-  runItTwice: false,
-  runItThrice: false,
+  runItPref: 'once',
+  deckColor: '2color',
   autoTopUp: false,
   autoTopUpTarget: 0,
   autoTopUpThreshold: 0,
@@ -236,7 +239,7 @@ export interface ClientToServerEvents {
   'game:update-stack': (data: { playerId: string; newStack: number }, callback: (success: boolean, error?: string) => void) => void;
   'player:update-preferences': (prefs: Partial<PlayerPreferences>, callback: (success: boolean, error?: string) => void) => void;
   'player:approve-topup': (playerId: string, callback: (success: boolean, error?: string) => void) => void;
-  'room:approve-join': (socketId: string) => void;
+  'room:approve-join': (socketId: string, adjustedBuyIn?: number) => void;
   'room:deny-join': (socketId: string, reason?: string) => void;
   'chat:send': (message: string) => void;
 }

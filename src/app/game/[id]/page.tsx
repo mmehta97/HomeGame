@@ -168,9 +168,11 @@ export default function GamePage() {
   }, []);
 
   const handleApproveJoin = useCallback((socketId: string) => {
-    getSocket().emit('room:approve-join', socketId);
+    const req = joinRequests.find(r => r.socketId === socketId);
+    const adjustedBuyIn = req?.buyIn;
+    getSocket().emit('room:approve-join', socketId, adjustedBuyIn);
     setJoinRequests(prev => prev.filter(r => r.socketId !== socketId));
-  }, []);
+  }, [joinRequests]);
 
   const handleDenyJoin = useCallback((socketId: string) => {
     getSocket().emit('room:deny-join', socketId);
@@ -238,7 +240,8 @@ export default function GamePage() {
               </div>
             ) : (
               /* Step 2: Name + buy-in form after seat selected */
-              <div className="w-[260px] rounded-lg bg-[#161a21] border border-[#262b33] p-4 space-y-3 animate-fade-in shadow-2xl pointer-events-auto">
+              <form onSubmit={e => { e.preventDefault(); if (joinName.trim() && buyIn > 0) handleJoin(); }}
+                className="w-[260px] rounded-lg bg-[#161a21] border border-[#262b33] p-4 space-y-3 animate-fade-in shadow-2xl pointer-events-auto">
                 <div className="text-center mb-1">
                   <div className="text-[11px] text-[#3b82f6]">Seat {selectedSeat + 1}</div>
                 </div>
@@ -263,11 +266,11 @@ export default function GamePage() {
                 </div>
 
                 <div className="flex gap-2">
-                  <button onClick={() => setSelectedSeat(null)}
+                  <button type="button" onClick={() => setSelectedSeat(null)}
                     className="px-3 py-2.5 rounded text-[12px] font-semibold text-[#6b7280] bg-[#1c2028] border border-[#262b33] transition-all active:scale-[0.97]">
                     Back
                   </button>
-                  <button onClick={handleJoin} disabled={!joinName.trim() || buyIn <= 0}
+                  <button type="submit" disabled={!joinName.trim() || buyIn <= 0}
                     className="flex-1 py-2.5 rounded font-bold text-[13px] text-white transition-all active:scale-[0.98] disabled:opacity-25"
                     style={{
                       background: (!joinName.trim() || buyIn <= 0) ? '#1c2028' : '#1e40af',
@@ -280,7 +283,7 @@ export default function GamePage() {
                 {error && (
                   <div className="rounded bg-[#ef4444]/10 border border-[#ef4444]/20 px-3 py-1.5 text-[11px] text-[#ef4444] text-center">{error}</div>
                 )}
-              </div>
+              </form>
             )}
           </div>
         </div>
@@ -333,12 +336,21 @@ export default function GamePage() {
       {isHost && joinRequests.length > 0 && (
         <div className="px-3 py-2 bg-[#161a21] border-b border-[#1c2028] flex flex-col gap-1.5 shrink-0 z-20">
           {joinRequests.map(req => (
-            <div key={req.socketId} className="flex items-center justify-between bg-[#1c2028] rounded px-3 py-2">
-              <div>
+            <div key={req.socketId} className="flex items-center justify-between gap-2 bg-[#1c2028] rounded px-3 py-2">
+              <div className="flex items-center gap-2">
                 <span className="text-[12px] text-white font-medium">{req.playerName}</span>
-                <span className="text-[10px] text-[#6b7280] ml-2">Seat {req.seatIndex + 1} &middot; Buy-in {req.buyIn}</span>
+                <span className="text-[10px] text-[#6b7280]">Seat {req.seatIndex + 1}</span>
               </div>
-              <div className="flex gap-1.5">
+              <div className="flex items-center gap-1.5">
+                <label className="text-[9px] text-[#6b7280]">Stack:</label>
+                <input type="text" inputMode="numeric" value={String(req.buyIn)}
+                  onChange={e => {
+                    const v = e.target.value.replace(/[^0-9]/g, '');
+                    setJoinRequests(prev => prev.map(r =>
+                      r.socketId === req.socketId ? { ...r, buyIn: v === '' ? 0 : parseInt(v, 10) } : r
+                    ));
+                  }}
+                  className="w-[60px] bg-[#0e1015] border border-[#262b33] rounded px-2 py-0.5 text-[11px] text-white text-center focus:border-[#3b82f6] focus:outline-none" />
                 <button onClick={() => handleApproveJoin(req.socketId)}
                   className="px-3 py-1 rounded text-[10px] font-bold text-white bg-[#1e40af] border border-[#3b82f680] hover:bg-[#2563eb] transition-all">
                   Approve

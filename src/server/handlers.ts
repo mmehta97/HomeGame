@@ -365,8 +365,8 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
     callback(true);
   });
 
-  // --- room:approve-join --- Host approves a pending join
-  socket.on('room:approve-join', (requestSocketId: string) => {
+  // --- room:approve-join --- Host approves a pending join (with optional buy-in override)
+  socket.on('room:approve-join', (requestSocketId: string, adjustedBuyIn?: number) => {
     const room = getRoomBySocketId(socket.id);
     if (!room) return;
 
@@ -378,9 +378,10 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
 
     room.pendingJoins.delete(requestSocketId);
 
-    // Add the player
+    // Add the player (use adjusted buy-in if host changed it)
+    const finalBuyIn = adjustedBuyIn && adjustedBuyIn > 0 ? adjustedBuyIn : request.buyIn;
     const playerId = requestSocketId;
-    const result = addPlayer(room.gameState, playerId, request.playerName, request.seatIndex, request.buyIn);
+    const result = addPlayer(room.gameState, playerId, request.playerName, request.seatIndex, finalBuyIn);
     if (result.error) {
       io.to(requestSocketId).emit('room:join-denied', result.error);
       return;
@@ -388,7 +389,7 @@ export function registerHandlers(io: AppServer, socket: AppSocket): void {
 
     room.gameState = result.state;
     room.playerSocketMap.set(requestSocketId, playerId);
-    updateLedger(room, playerId, request.playerName, request.buyIn);
+    updateLedger(room, playerId, request.playerName, finalBuyIn);
 
     io.to(requestSocketId).emit('room:joined', {
       roomId: room.id, playerId, seatIndex: request.seatIndex, isHost: false,
